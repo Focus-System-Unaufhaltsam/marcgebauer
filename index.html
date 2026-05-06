@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MG PRECISION | FOCUS SYSTEM</title>
+    <style>
+        :root { 
+            --mg-dark: #343536; 
+            --mg-light: #f1f1f1; 
+            --mg-gold: #c5a059; 
+            --danger: #c92a2a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: var(--mg-light); 
+            color: var(--mg-dark); 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            touch-action: none; 
+        }
+
+        /* HUD */
+        .hud { 
+            position: absolute; top: 0; left: 0; right: 0;
+            z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 0; padding: 12px 15px; background: var(--mg-dark);
+            border-bottom: 3px solid var(--mg-gold);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .stat { text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
+        .stat:last-child { border-right: none; }
+        .stat .label { font-size: 9px; text-transform: uppercase; color: #aaa; letter-spacing: 2px; margin-bottom: 2px; }
+        .stat .value { font-size: 20px; font-weight: bold; color: #fff; }
+
+        /* Spielfeld */
+        .game-shell { 
+            flex-grow: 1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%; 
+            height: 100%; 
+            padding-top: 60px; 
+            background: radial-gradient(circle, #fff 0%, #eee 100%);
+        }
+        
+        canvas { 
+            display: block;
+            width: 100%; 
+            height: auto;
+            max-width: 95vw; 
+            max-height: 75vh; 
+            cursor: pointer; 
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2)); 
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Overlays */
+        .overlay { position: absolute; inset: 0; background: rgba(52, 53, 54, 0.95); display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
+        .overlay.hidden { display: none !important; }
+        
+        .card { max-width: 440px; width: 100%; border-top: 4px solid var(--mg-gold); padding: 35px 25px; background: #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border-radius: 2px; position: relative; }
+        
+        h1 { font-size: 24px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 5px; color: var(--mg-dark); font-weight: 900; }
+        .subtitle { font-size: 10px; color: #888; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; }
+        
+        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; position: relative; overflow: hidden; }
+        .btn:hover { background: var(--mg-gold); color: #000; }
+        .btn-gold { background: var(--mg-gold); color: #000; }
+        .btn-outline { background: #fff; color: var(--mg-dark); border: 2px solid var(--mg-dark); padding: 12px; font-size: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+
+        .identity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 3px solid var(--mg-gold); }
+        .id-stat { text-align: left; }
+        .id-stat span { display: block; font-size: 9px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+        .id-stat strong { display: block; font-size: 14px; color: var(--mg-dark); font-weight: 900; }
+
+        .lock-container { position: relative; margin-bottom: 20px; }
+        .locked-content { filter: blur(6px); pointer-events: none; user-select: none; opacity: 0.6; transition: 0.5s; }
+        .lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        .unlocked .locked-content { filter: blur(0); pointer-events: auto; opacity: 1; }
+        .unlocked .lock-overlay { display: none; }
+
+        .lb-container { margin: 25px 0; border: 1px solid #ddd; padding: 15px; background: #fafafa; border-radius: 4px; }
+        .lb-title { font-size: 13px; font-weight: 900; letter-spacing: 2px; border-bottom: 2px solid var(--mg-dark); padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase; color: var(--mg-dark); }
+        .lb-list { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        
+        #nameInput { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; font-size: 15px; text-align: center; font-weight: bold; outline: none; text-transform: uppercase; }
+        #nameInput:focus { border-color: var(--mg-gold); }
+        
+        .shake-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
+
+        /* Rechtliches */
+        .legal-links { margin-top: 15px; display: flex; justify-content: center; gap: 15px; }
+        .legal-links a { font-size: 9px; color: #aaa; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+    <section class="hud">
+        <div class="stat"><div class="label">System Score</div><div class="value" id="scoreValue">0</div></div>
+        <div class="stat"><div class="label">Level</div><div class="value" id="roundValue">1</div></div>
+        <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
+    </section>
+
+    <main class="game-shell">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+        
+        <div class="overlay" id="startOverlay">
+            <div class="card">
+                <h1>FOCUS SYSTEM</h1>
+                <p class="subtitle">MG PERFORMANCE DIAGNOSTICS</p>
+                <button class="btn" id="startBtn">SYSTEM STARTEN</button>
+                <div class="lb-container">
+                    <div class="lb-title">ELITE RANKING</div>
+                    <ul class="lb-list" id="startLeaderboard"><li style="font-size:12px; color:#888;">Lade Ranking...</li></ul>
+                </div>
+                <div class="legal-links">
+                    <a href="impressum.html">Impressum</a>
+                    <a href="datenschutz.html">Datenschutz</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="overlay hidden" id="gameOverOverlay">
+            <div class="card">
+                <h1 style="color:var(--danger); margin-bottom:5px;">SYSTEM FAILED</h1>
+                <p id="aiText" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4;">Analysiere Fokus...</p>
+                <div id="finalScore" style="font-size:70px; font-weight:900; margin:15px 0; color: var(--mg-dark);">0</div>
+                
+                <div class="identity-grid">
+                    <div class="id-stat"><span>Globaler Platz</span><strong id="idRank">#--</strong></div>
+                    <div class="id-stat"><span>Percentile</span><strong id="idPercentile">Top 99%</strong></div>
+                </div>
+                
+                <div id="viralLockContainer" class="lock-container">
+                    <div class="lock-overlay" id="lockOverlay">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🔒</div>
+                        <p style="font-size: 11px; font-weight: bold; margin-bottom: 10px; color: #000; text-transform: uppercase;">Ranking Locked.</p>
+                        <button class="btn btn-gold" id="shareBtnUnlock" style="margin-bottom:0;">EGO BEWEISEN (SHARE)</button>
+                    </div>
+                    <div class="locked-content" id="saveScoreSection">
+                        <p style="font-size: 12px; font-weight: 900; margin-bottom: 10px; color: var(--mg-dark); text-transform: uppercase;">SPOT SICHERN:</p>
+                        <input type="text" id="nameInput" placeholder="NAME ODER INSTA" maxlength="30" autocomplete="off">
+                        <button class="btn btn-outline" id="saveBtn">INS RANKING AUFNEHMEN</button>
+                    </div>
+                </div>
+
+                <button class="btn" id="restartBtn">SYSTEM REBOOT</button>
+                <a href="https://marcgebauer.com" target="_blank" style="color:#aaa; font-weight:bold; text-decoration:none; display:block; margin-top:20px; font-size:10px; text-transform:uppercase;">MARCGEBAUER.COM</a>
+            </div>
+        </div>
+    </main>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC0olKESyTP0rXUlnjGstLlGN50I1m_O2A",
+        authDomain: "mg-challenge.firebaseapp.com",
+        projectId: "mg-challenge",
+        storageBucket: "mg-challenge.firebasestorage.app",
+        messagingSenderId: "472289048663",
+        appId: "1:472289048663:web:cc68ded6007e1e822c4b12"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    const databasePath = 'mg-precision-vfinal';
+    
+    let currentUser = null;
+    let globalLeaderboard = [];
+
+    signInAnonymously(auth).catch(e => console.error("Auth Error:", e));
+
+    getAuth().onAuthStateChanged((user) => { 
+        currentUser = user; 
+        if (user) {
+            const lbRef = collection(db, 'artifacts', databasePath, 'public', 'data', 'leaderboard');
+            onSnapshot(lbRef, (snapshot) => {
+                globalLeaderboard = [];
+                snapshot.forEach(doc => globalLeaderboard.push({id: doc.id, ...doc.data()}));
+                globalLeaderboard.sort((a, b) => b.score - a.score);
+                const listEl = document.getElementById("startLeaderboard");
+                listEl.innerHTML = globalLeaderboard.length
+                    ? globalLeaderboard.slice(0, 10).map((e, i) => `
+                        <li class="lb-row">
+                            <span style="font-weight: bold; color: #888; width: 35px; text-align: left;">#${i + 1}</span>
+                            <span style="font-weight: bold; color: var(--mg-dark); flex-grow: 1; text-align: left;">${e.name}</span>
+                            <span style="font-weight: 900; color: var(--mg-gold); margin-left: 10px;">${e.score} Pkt.</span>
+                        </li>`).join("")
+                    : '<li style="font-size:12px; color:#888; padding:8px 0;">Noch keine Einträge</li>';
+            });
+        }
+    });
+
+    // --- GEMINI AI (Fallback für Marc's Sprüche) ---
+    async function marcAnalysis(score) {
+      const aiTextEl = document.getElementById("aiText");
+      aiTextEl.textContent = '"Fokus verloren. In der Zeit habe ich drei Uhren verkauft."';
+    }
+
+    // --- SPIELEMECHANIK ---
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreValue = document.getElementById("scoreValue");
+    const roundValue = document.getElementById("roundValue");
+    const bestValue = document.getElementById("bestValue");
+    const startOverlay = document.getElementById("startOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const nameInput = document.getElementById("nameInput");
+
+    const BEST_KEY = "mgPrecisionBest_v1";
+
+    const state = {
+      running: false, score: 0, round: 1, boxCount: 2,
+      best: Number(localStorage.getItem(BEST_KEY) || 0),
+      phase: "idle", phaseStartedAt: 0, selectedBoxId: null, correctBoxId: null,
+      hoverBoxId: null, showBallTime: 1400, shuffleDuration: 2200,
+      swapsRemaining: 0, activeSwap: null, breatherMs: 300
+    };
+
+    const boxes = [];
+    bestValue.textContent = state.best;
+
+    function setPhase(next) { state.phase = next; state.phaseStartedAt = performance.now(); }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+    function roundRect(c, x, y, w, h, r, fill, stroke) {
+      c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y);
+      c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
+      c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h);
+      c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r);
+      c.quadraticCurveTo(x, y, x + r, y); c.closePath();
+      if (fill) c.fill(); if (stroke) c.stroke();
+    }
+
+    function drawBoxes() {
+      boxes.forEach(box => {
+        const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
+        const y = box.y - box.lift;
+        const cx = box.x + box.w / 2;
+        const cy = y + box.h / 2;
+        ctx.save();
+        ctx.fillStyle = isHovered ? "#333333" : "#222222";
+        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
+        roundRect(ctx, box.x, y, box.w, box.h, 12, true, true);
+        if (isHovered) {
+          ctx.strokeStyle = "#c5a059"; ctx.lineWidth = 5;
+          roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        }
+        if (state.phase === "reveal" && state.selectedBoxId === box.id) {
+          ctx.strokeStyle = state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#c92a2a";
+          ctx.lineWidth = 5; roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
+        }
+        if ((state.phase === "show" || state.phase === "reveal") && box.id === state.correctBoxId) {
+          ctx.fillStyle = "#c5a059"; ctx.font = `${box.w * 0.45}px Arial`;
+          ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("👑", cx, cy);
+        }
+        ctx.restore();
+      });
+    }
+
+    function buildRound() {
+      boxes.length = 0; state.activeSwap = null; state.selectedBoxId = null; state.hoverBoxId = null;
+      const count = state.boxCount;
+      const maxCols = 5; const cols = Math.min(maxCols, count); const rows = Math.ceil(count / maxCols);
+      const spacing = 24; const availableW = canvas.width - 160; const availableH = canvas.height - 200;
+      const boxW = Math.min(92, Math.min(availableW / cols - spacing, availableH / rows - spacing));
+      const boxH = boxW; const gridH = rows * boxH + (rows - 1) * spacing;
+      const startY = 160 + (availableH - gridH) / 2;
+
+      for (let i = 0; i < count; i++) {
+        const r = Math.floor(i / maxCols); const c = i % maxCols;
+        const boxesInThisRow = Math.min(maxCols, count - r * maxCols);
+        const rowWidth = boxesInThisRow * boxW + (boxesInThisRow - 1) * spacing;
+        const startX = (canvas.width - rowWidth) / 2;
+        boxes.push({ id: i, x: startX + c * (boxW + spacing), y: startY + r * (boxH + spacing), w: boxW, h: boxH, lift: 0 });
+      }
+      state.correctBoxId = Math.floor(Math.random() * count);
+      state.shuffleDuration = Math.max(1200, 2400 - state.score * 55);
+      state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
+      setPhase("show");
+    }
+
+    function startNextSwap() {
+      if (state.swapsRemaining <= 0) { state.activeSwap = null; setPhase("wait"); return; }
+      let a = Math.floor(Math.random() * boxes.length); let b = Math.floor(Math.random() * boxes.length);
+      while (b === a) b = Math.floor(Math.random() * boxes.length);
+      const boxA = boxes[a]; const boxB = boxes[b];
+      state.activeSwap = {
+        aId: boxA.id, bId: boxB.id, aStartX: boxA.x, bStartX: boxB.x, aStartY: boxA.y, bStartY: boxB.y,
+        aTargetX: boxB.x, bTargetX: boxA.x, aTargetY: boxB.y, bTargetY: boxA.y,
+        start: performance.now(), duration: Math.max(260, state.shuffleDuration / 5.2)
+      };
+      state.swapsRemaining--;
+    }
+
+    function updateBoxes(ts) {
+      if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { setPhase("shuffle"); startNextSwap(); }
+      else if (state.phase === "shuffle") {
+        if (!state.activeSwap) { startNextSwap(); return; }
+        const swap = state.activeSwap; const p = Math.min(1, (ts - swap.start) / swap.duration); const e = easeInOutQuad(p);
+        const boxA = boxes.find(box => box.id === swap.aId); const boxB = boxes.find(box => box.id === swap.bId);
+        boxA.x = lerp(swap.aStartX, swap.aTargetX, e); boxB.x = lerp(swap.bStartX, swap.bTargetX, e);
+        boxA.y = lerp(swap.aStartY, swap.aTargetY, e); boxB.y = lerp(swap.bStartY, swap.bTargetY, e);
+        if (p >= 1) { boxA.x = swap.aTargetX; boxA.y = swap.aTargetY; boxB.x = swap.bTargetX; boxB.y = swap.bTargetY; state.activeSwap = null; }
+      } else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) { setPhase("pick"); }
+      else if (state.phase === "reveal") {
+        const selected = boxes.find(box => box.id === state.selectedBoxId); const correct = boxes.find(box => box.id === state.correctBoxId);
+        if (selected) selected.lift = Math.min(selected.h * 0.8, selected.lift + 5);
+        if (correct && correct.id !== state.selectedBoxId) correct.lift = Math.min(correct.h * 0.8, correct.lift + 5);
+        if (ts - state.phaseStartedAt > 1200) {
+          if (state.selectedBoxId === state.correctBoxId) { state.score++; state.round++; state.boxCount = 2 + state.score; buildRound(); updateHud(); }
+          else gameOver();
+        }
+      }
+      if (state.phase !== "reveal") boxes.forEach(box => { box.lift = Math.max(0, box.lift - 6); });
+    }
+
+    function gameOver() {
+      state.running = false; setPhase("gameover");
+      if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
+      document.getElementById("finalScore").textContent = state.score;
+      updateHud();
+      const rank = globalLeaderboard.filter(e => e.score > state.score).length + 1;
+      document.getElementById("idRank").textContent = `#${rank}`;
+      const percentile = Math.min(99.9, Math.max(1, (1 - Math.exp(-state.score * 0.15)) * 100));
+      document.getElementById("idPercentile").textContent = `Top ${(100 - percentile).toFixed(1)}%`;
+      const viral = document.getElementById("viralLockContainer");
+      if (state.score >= 5) { viral.style.display = "block"; viral.classList.remove("unlocked"); } 
+      else viral.style.display = "none";
+      gameOverOverlay.classList.remove("hidden"); marcAnalysis(state.score);
+    }
+
+    function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; bestValue.textContent = state.best; }
+    function startGame() { state.running = true; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); }
+
+    function getCanvasPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      let cx = e.touches ? e.touches[0].clientX : e.clientX;
+      let cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: (cx - rect.left) * (canvas.width / rect.width), y: (cy - rect.top) * (canvas.height / rect.height) };
+    }
+
+    function handleTap(e) {
+      const { x, y } = getCanvasPos(e);
+      if (state.phase === "pick") {
+        let clickedId = null;
+        boxes.forEach(box => { if (x >= box.x && x <= box.x + box.w && y >= box.y - box.lift && y <= box.y - box.lift + box.h) clickedId = box.id; });
+        if (clickedId !== null) { state.selectedBoxId = clickedId; setPhase("reveal"); }
+      }
+    }
+
+    function loop(ts) { ctx.clearRect(0, 0, canvas.width, canvas.height); if (state.running) updateBoxes(ts); drawBoxes(); requestAnimationFrame(loop); }
+
+    canvas.addEventListener("click", handleTap);
+    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleTap(e); }, { passive: false });
+    startBtn.onclick = startGame; restartBtn.onclick = startGame;
+
+    document.getElementById("shareBtnUnlock").onclick = () => {
+        const text = `Mein MG Focus Score: ${state.score}. Schaffst du mehr? ${window.location.href}`;
+        if (navigator.share) navigator.share({ text }).then(() => document.getElementById("viralLockContainer").classList.add("unlocked"));
+        else { navigator.clipboard.writeText(text); document.getElementById("viralLockContainer").classList.add("unlocked"); }
+    };
+
+    document.getElementById("saveBtn").onclick = async () => {
+        if (!currentUser) return;
+        const name = nameInput.value.trim().toUpperCase() || "ANON";
+        try {
+            await setDoc(doc(db, 'artifacts', databasePath, 'public', 'data', 'leaderboard', currentUser.uid), { name, score: state.score, timestamp: Date.now() });
+            document.getElementById("saveScoreSection").style.display = "none";
+        } catch(e) { console.error(e); }
+    };
+
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>

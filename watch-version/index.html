@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE CHALLENGE | Eddie's World Edition</title>
+    <style>
+        :root { --gold: #d4af37; --black: #000; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', serif; }
+        
+        body { 
+            background: var(--black);
+            /* Wir versuchen erst jpg, falls das nicht geht, ist das PNG das Backup */
+            background-image: url('pacman_bg.jpg'), url('pacman_bg.png'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            overflow: hidden; 
+        }
+
+        #game-container { 
+            position: relative; 
+            border: 2px solid var(--gold); 
+            /* Wir machen das Schwarz hier etwas durchsichtiger (0.6), damit das Pacman-Bild besser durchkommt */
+            background: rgba(0, 0, 0, 0.6); 
+            width: 95vw; 
+            height: 75vh; 
+            max-width: 1100px; 
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.4); 
+            backdrop-filter: blur(5px);
+        }
+
+        canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+        
+        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 100; padding: 20px; }
+        
+        h1 { color: var(--gold); font-size: clamp(28px, 6vw, 52px); margin-bottom: 10px; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
+        
+        .btn-gold { background: var(--gold); color: #000; padding: 18px 40px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; font-size: 16px; letter-spacing: 2px; text-decoration: none; display: inline-block; transition: 0.3s; margin: 10px; }
+        .btn-gold:hover { background: #fff; transform: scale(1.05); }
+
+        .ui-top { position: absolute; top: -50px; width: 100%; display: flex; justify-content: space-between; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="ui-top">
+            <div>LEVEL: <span id="levelValue">1</span></div>
+            <div>RECORD: <span id="bestValue">0</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="startOverlay" class="overlay">
+            <h1>THE CHALLENGE</h1>
+            <p style="color:var(--gold); letter-spacing: 3px; margin-bottom: 30px; font-weight: bold;">EDDIE'S WORLD x MARC GEBAUER</p>
+            <button class="btn-gold" onclick="startGame()">START MISSION</button>
+        </div>
+
+        <div id="gameOverOverlay" class="overlay" style="display:none;">
+            <h1 style="color:#ff4444;">FOCUS LOST</h1>
+            <p style="color:#aaa; margin-bottom:30px;">The crown is gone. Try again to impress Marc.</p>
+            <a href="https://marcgebauer.com" target="_blank" class="btn-gold">VIEW COLLECTION</a>
+            <button style="background:none; color:white; border:1px solid white; padding:12px 25px; cursor:pointer; text-transform: uppercase;" onclick="location.reload()">RETRY</button>
+            <p style="margin-top:50px; font-size:11px; color:#555; letter-spacing:3px;">DEVELOPED BY KEVIN SCHULZE | EDDIE'S WORLD</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Spiellogik ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const levelEl = document.getElementById('levelValue');
+        const bestEl = document.getElementById('bestValue');
+
+        let level = 1;
+        let best = localStorage.getItem('precisionRecord') || 0;
+        let boxes = [];
+        let winningId = 0;
+        let state = "idle"; 
+        bestEl.innerText = best;
+
+        function resize() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Box {
+            constructor(id, total) {
+                this.id = id;
+                this.updateSize(total);
+                this.y = canvas.height / 2;
+                this.x = (canvas.width / (total + 1)) * (id + 1);
+                this.targetX = this.x;
+            }
+            updateSize(total) {
+                this.size = Math.min(140, (canvas.width / (total + 1.8)));
+            }
+            draw(showContent) {
+                ctx.fillStyle = 'rgba(20, 20, 20, 0.9)';
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 3;
+                ctx.fillRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                ctx.strokeRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                
+                if (showContent && this.id === winningId) {
+                    this.drawCrown(this.x, this.y);
+                }
+            }
+            drawCrown(x, y) {
+                const s = this.size * 0.5;
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath();
+                ctx.moveTo(x - s/2, y + s/3);
+                ctx.lineTo(x + s/2, y + s/3);
+                ctx.lineTo(x + s/2, y - s/4);
+                ctx.lineTo(x + s/4, y + s/8);
+                ctx.lineTo(x, y - s/2);
+                ctx.lineTo(x - s/4, y + s/8);
+                ctx.lineTo(x - s/2, y - s/4);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        function startGame() {
+            document.getElementById('startOverlay').style.display = 'none';
+            level = 1;
+            nextLevel();
+        }
+
+        function nextLevel() {
+            state = "showing";
+            levelEl.innerText = level;
+            const count = Math.min(level + 1, 7); 
+            boxes = [];
+            for(let i=0; i<count; i++) boxes.push(new Box(i, count));
+            winningId = Math.floor(Math.random() * count);
+            setTimeout(() => { state = "shuffling"; shuffle(); }, 1200);
+        }
+
+        function shuffle() {
+            let moves = 0;
+            let maxMoves = 5 + level * 2;
+            let speed = Math.max(110, 500 - (level * 40));
+            const interval = setInterval(() => {
+                let i = Math.floor(Math.random() * boxes.length);
+                let j = Math.floor(Math.random() * boxes.length);
+                while(i === j) j = Math.floor(Math.random() * boxes.length);
+                let temp = boxes[i].targetX;
+                boxes[i].targetX = boxes[j].targetX;
+                boxes[j].targetX = temp;
+                moves++;
+                if(moves >= maxMoves) { clearInterval(interval); state = "waiting"; }
+            }, speed);
+        }
+
+        function animate() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            boxes.forEach(b => {
+                b.x += (b.targetX - b.x) * 0.2;
+                b.draw(state === "showing");
+            });
+            requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if(state !== "waiting") return;
+            const rect = canvas.getBoundingClientRect();
+            const mX = e.clientX - rect.left;
+            const mY = e.clientY - rect.top;
+            boxes.forEach(b => {
+                if(Math.abs(mX - b.x) < b.size/2 && Math.abs(mY - b.y) < b.size/2) {
+                    if(b.id === winningId) { level++; nextLevel(); }
+                    else { state = "over"; if(level-1 > best) localStorage.setItem('precisionRecord', level-1); document.getElementById('gameOverOverlay').style.display = 'flex'; }
+                }
+            });
+        });
+        animate();
+    </script>
+</body>
+</html>
