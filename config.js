@@ -4,31 +4,32 @@
 
 const CLIENT_CONFIG = {
     // 1. SYSTEM & DATABASE
-    id: "unaufhaltsam-master-v1",   // Eindeutige Firebase ID (keine Leerzeichen)
-    brandColor: "#7C3AED",          // Deine Brand-Farbe (Purpur) als Standard
-    easterEggScore: 29,             // Sieg nach 30 Kisten (Score 29)
+    id: "leaderboard_marc",   // Unique ID (e.g., 'marcgebauer' or 'eddie')
+    brandColor: "#c5a059",          // Primary color (Purple for Eddie, Gold for Marc)
+    easterEggScore: 29,             // Victory after 30 boxes (Internal Score 29)
 
-    // 2. BRANDING & IDENTITY (English, except UNAUFHALTSAM)
+    // 2. BRANDING & IDENTITY (Only "UNAUFHALTSAM" is German)
     brandTitle: "UNAUFHALTSAM",
     brandSub: "PRECISION UNDER PRESSURE",
-    startDesc: "Focus the target. Luxury means nothing without focus. Any mistake ends the system.",
-    boxOverlayText: "FOCUS",
+    startDesc: "Focus on the target box. Any mistake ends the system immediately.",
+    boxOverlayText: "FOCUS",        // The text pulsing on the target
     
-    // 3. REWARDS & RETENTION
-    rewardTitle: "ELITE STATUS: CLAIM YOUR REWARD",
+    // 3. REWARDS & CODES
+    rewardTitle: "ELITE STATUS REACHED: CLAIM YOUR REWARD",
     rewardSuccess: "CLAIMED. YOU WILL BE CONTACTED.",
+    rewardCode: "MASTER30",
 
-    // 4. PSYCHOLOGICAL QUOTES (The Frustration Curve)
+    // 4. PSYCHOLOGICAL QUOTES (The 6 Stages of Frustration)
     quotes: [
-        '"Focus is a choice. You just chose against it."',                 // 0-5
-        '"Consistency separates the wheat from the chaff."',              // 6-10
-        '"Waking up. Now the real mental work begins."',                  // 11-15
-        '"Strong performance. You are above average."',                   // 16-20
-        '"Outstanding. You control the system, not the other way around."',// 21-25
-        '"Absolute Elite. You broke the 30-box wall. Respect."'            // 26+
+        '"Focus is a choice. You just chose against it."',
+        '"Consistency separates the wheat from the chaff."',
+        '"Waking up. Now the real mental work begins."',
+        '"Strong performance. You are above average."',
+        '"Outstanding. You control the system, not the other way around."',
+        '"Absolute Elite. You broke the 30-box wall. Respect."'
     ],
 
-    // 5. LEGAL (Automatic injection)
+    // 5. LEGAL (Automatic injection for Imprint/Privacy)
     legal: {
         name: "YOUR NAME / COMPANY",
         street: "STREET 123",
