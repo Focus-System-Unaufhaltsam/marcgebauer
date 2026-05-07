@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,9 +10,10 @@
             --mg-light: #f1f1f1; 
             --mg-gold: #c5a059; 
             --danger: #c92a2a;
+            --success: #0f9d58;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background: var(--mg-light); 
@@ -29,7 +30,7 @@
         .hud { 
             position: absolute; top: 0; left: 0; right: 0;
             z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 0; padding: 12px 15px; background: var(--mg-dark);
+            padding: 12px 15px; background: var(--mg-dark);
             border-bottom: 3px solid var(--mg-gold);
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
@@ -56,59 +57,34 @@
             height: auto;
             max-width: 95vw; 
             max-height: 75vh; 
-            cursor: pointer; 
             filter: drop-shadow(0 15px 30px rgba(0,0,0,0.2)); 
             touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
         /* Overlays */
-        .overlay { position: absolute; inset: 0; background: rgba(52, 53, 54, 0.95); display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; overflow-y: auto; padding: 20px; backdrop-filter: blur(5px); }
+        .overlay { position: absolute; inset: 0; background: rgba(52, 53, 54, 0.95); display: flex; align-items: center; justify-content: center; z-index: 100; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
         .overlay.hidden { display: none !important; }
         
-        .card { max-width: 440px; width: 100%; border-top: 4px solid var(--mg-gold); padding: 35px 25px; background: #fff; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border-radius: 2px; position: relative; }
+        .card { max-width: 440px; width: 100%; border-top: 4px solid var(--mg-gold); padding: 35px 25px; background: #fff; border-radius: 2px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
         
         h1 { font-size: 24px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 5px; color: var(--mg-dark); font-weight: 900; }
         .subtitle { font-size: 10px; color: #888; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; }
         
-        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; position: relative; overflow: hidden; }
+        .btn { background: var(--mg-dark); color: #fff; border: none; padding: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; width: 100%; margin-bottom: 12px; transition: 0.2s; }
         .btn:hover { background: var(--mg-gold); color: #000; }
         .btn-gold { background: var(--mg-gold); color: #000; }
-        .btn-outline { background: #fff; color: var(--mg-dark); border: 2px solid var(--mg-dark); padding: 12px; font-size: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        .identity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 3px solid var(--mg-gold); }
-        .id-stat { text-align: left; }
-        .id-stat span { display: block; font-size: 9px; color: #888; letter-spacing: 1px; text-transform: uppercase; }
-        .id-stat strong { display: block; font-size: 14px; color: var(--mg-dark); font-weight: 900; }
-
-        .lock-container { position: relative; margin-bottom: 20px; }
-        .locked-content { filter: blur(6px); pointer-events: none; user-select: none; opacity: 0.6; transition: 0.5s; }
-        .lock-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        .unlocked .locked-content { filter: blur(0); pointer-events: auto; opacity: 1; }
-        .unlocked .lock-overlay { display: none; }
-
-        .lb-container { margin: 25px 0; border: 1px solid #ddd; padding: 15px; background: #fafafa; border-radius: 4px; }
-        .lb-title { font-size: 13px; font-weight: 900; letter-spacing: 2px; border-bottom: 2px solid var(--mg-dark); padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase; color: var(--mg-dark); }
-        .lb-list { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
-        .lb-row { display: flex; justify-content: space-between; font-size: 14px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        #nameInput, #igInput { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; font-size: 15px; text-align: center; font-weight: bold; outline: none; text-transform: uppercase; }
         
-        #nameInput { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; font-size: 15px; text-align: center; font-weight: bold; outline: none; text-transform: uppercase; }
-        #nameInput:focus { border-color: var(--mg-gold); }
-        
-        .shake-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px); } 40%, 80% { transform: translateX(15px); } }
-
-        /* Rechtliches */
-        .legal-links { margin-top: 15px; display: flex; justify-content: center; gap: 15px; }
-        .legal-links a { font-size: 9px; color: #aaa; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+        .lb-container { margin: 20px 0; text-align: left; }
+        .lb-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #eee; font-weight: bold; }
     </style>
 </head>
 <body>
     <section class="hud">
-        <div class="stat"><div class="label">System Score</div><div class="value" id="scoreValue">0</div></div>
-        <div class="stat"><div class="label">Level</div><div class="value" id="roundValue">1</div></div>
-        <div class="stat"><div class="label">Best</div><div class="value" id="bestValue">0</div></div>
+        <div class="stat"><div class="label">Score</div><div class="value" id="scoreValue">0</div></div>
+        <div class="stat"><div class="label">Boxes</div><div class="value" id="boxValue">2</div></div>
+        <div class="stat"><div class="label">Time</div><div class="value" id="timeValue">0.0s</div></div>
     </section>
 
     <main class="game-shell">
@@ -118,277 +94,230 @@
             <div class="card">
                 <h1>FOCUS SYSTEM</h1>
                 <p class="subtitle">MG PERFORMANCE DIAGNOSTICS</p>
-                <button class="btn" id="startBtn">SYSTEM STARTEN</button>
+                <button class="btn" id="startBtn">START SYSTEM</button>
                 <div class="lb-container">
-                    <div class="lb-title">ELITE RANKING</div>
-                    <ul class="lb-list" id="startLeaderboard"><li style="font-size:12px; color:#888;">Lade Ranking...</li></ul>
-                </div>
-                <div class="legal-links">
-                    <a href="impressum.html">Impressum</a>
-                    <a href="datenschutz.html">Datenschutz</a>
+                    <p style="font-size:10px; font-weight:900; margin-bottom:8px; color:var(--mg-gold);">GLOBAL RANKING</p>
+                    <div id="leaderboardList"></div>
                 </div>
             </div>
         </div>
 
         <div class="overlay hidden" id="gameOverOverlay">
             <div class="card">
-                <h1 style="color:var(--danger); margin-bottom:5px;">SYSTEM FAILED</h1>
-                <p id="aiText" style="font-size: 13px; color: #555; font-weight: bold; font-style: italic; margin-top: 8px; line-height: 1.4;">Analysiere Fokus...</p>
-                <div id="finalScore" style="font-size:70px; font-weight:900; margin:15px 0; color: var(--mg-dark);">0</div>
+                <h1 style="color:var(--danger);">SYSTEM FAILED</h1>
+                <p id="aiText" style="font-size:13px; font-weight:bold; font-style:italic; margin:15px 0; min-height:40px; color:#555; line-height:1.4;"></p>
+                <div id="finalScore" style="font-size:60px; font-weight:900; color:var(--mg-dark);">0</div>
+                <p id="finalTime" style="font-size:12px; opacity:0.6; margin-bottom:20px;">TIME: 0.00s</p>
                 
-                <div class="identity-grid">
-                    <div class="id-stat"><span>Globaler Platz</span><strong id="idRank">#--</strong></div>
-                    <div class="id-stat"><span>Percentile</span><strong id="idPercentile">Top 99%</strong></div>
-                </div>
-                
-                <div id="viralLockContainer" class="lock-container">
-                    <div class="lock-overlay" id="lockOverlay">
-                        <div style="font-size: 24px; margin-bottom: 10px;">🔒</div>
-                        <p style="font-size: 11px; font-weight: bold; margin-bottom: 10px; color: #000; text-transform: uppercase;">Ranking Locked.</p>
-                        <button class="btn btn-gold" id="shareBtnUnlock" style="margin-bottom:0;">EGO BEWEISEN (SHARE)</button>
-                    </div>
-                    <div class="locked-content" id="saveScoreSection">
-                        <p style="font-size: 12px; font-weight: 900; margin-bottom: 10px; color: var(--mg-dark); text-transform: uppercase;">SPOT SICHERN:</p>
-                        <input type="text" id="nameInput" placeholder="NAME ODER INSTA" maxlength="30" autocomplete="off">
-                        <button class="btn btn-outline" id="saveBtn">INS RANKING AUFNEHMEN</button>
-                    </div>
+                <div id="rewardSection" style="display:none; background:var(--mg-light); padding:15px; margin-bottom:15px; border-left:4px solid var(--mg-gold);">
+                    <p style="font-size:11px; font-weight:900; margin-bottom:10px;">ELITE STATUS: CLAIM REWARD</p>
+                    <input type="text" id="igInput" placeholder="INSTAGRAM HANDLE">
+                    <button class="btn btn-gold" id="claimBtn">CONFIRM WITH MARC</button>
                 </div>
 
-                <button class="btn" id="restartBtn">SYSTEM REBOOT</button>
-                <a href="https://marcgebauer.com" target="_blank" style="color:#aaa; font-weight:bold; text-decoration:none; display:block; margin-top:20px; font-size:10px; text-transform:uppercase;">MARCGEBAUER.COM</a>
+                <input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="15">
+                <button class="btn" id="saveBtn">SAVE RANK</button>
+                <button class="btn" style="background:#eee; color:#000;" onclick="location.reload()">REBOOT</button>
             </div>
         </div>
     </main>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyC0olKESyTP0rXUlnjGstLlGN50I1m_O2A",
-        authDomain: "mg-challenge.firebaseapp.com",
-        projectId: "mg-challenge",
-        storageBucket: "mg-challenge.firebasestorage.app",
-        messagingSenderId: "472289048663",
-        appId: "1:472289048663:web:cc68ded6007e1e822c4b12"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyC0olKESyTP0rXUlnjGstLlGN50I1m_O2A", authDomain: "mg-challenge.firebaseapp.com", projectId: "mg-challenge", storageBucket: "mg-challenge.firebasestorage.app", messagingSenderId: "472289048663", appId: "1:472289048663:web:cc68ded6007e1e822c4b12" };
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const dbRef = collection(db, "leaderboard_marc");
+
+    const canvas = document.getElementById("gameCanvas"); const ctx = canvas.getContext("2d");
     
-    const databasePath = 'mg-precision-vfinal';
-    
-    let currentUser = null;
-    let globalLeaderboard = [];
-
-    signInAnonymously(auth).catch(e => console.error("Auth Error:", e));
-
-    getAuth().onAuthStateChanged((user) => { 
-        currentUser = user; 
-        if (user) {
-            const lbRef = collection(db, 'artifacts', databasePath, 'public', 'data', 'leaderboard');
-            onSnapshot(lbRef, (snapshot) => {
-                globalLeaderboard = [];
-                snapshot.forEach(doc => globalLeaderboard.push({id: doc.id, ...doc.data()}));
-                globalLeaderboard.sort((a, b) => b.score - a.score);
-                const listEl = document.getElementById("startLeaderboard");
-                listEl.innerHTML = globalLeaderboard.length
-                    ? globalLeaderboard.slice(0, 10).map((e, i) => `
-                        <li class="lb-row">
-                            <span style="font-weight: bold; color: #888; width: 35px; text-align: left;">#${i + 1}</span>
-                            <span style="font-weight: bold; color: var(--mg-dark); flex-grow: 1; text-align: left;">${e.name}</span>
-                            <span style="font-weight: 900; color: var(--mg-gold); margin-left: 10px;">${e.score} Pkt.</span>
-                        </li>`).join("")
-                    : '<li style="font-size:12px; color:#888; padding:8px 0;">Noch keine Einträge</li>';
-            });
-        }
-    });
-
-    // --- GEMINI AI (Fallback für Marc's Sprüche) ---
-    async function marcAnalysis(score) {
-      const aiTextEl = document.getElementById("aiText");
-      aiTextEl.textContent = '"Fokus verloren. In der Zeit habe ich drei Uhren verkauft."';
-    }
-
-    // --- SPIELEMECHANIK ---
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const scoreValue = document.getElementById("scoreValue");
-    const roundValue = document.getElementById("roundValue");
-    const bestValue = document.getElementById("bestValue");
-    const startOverlay = document.getElementById("startOverlay");
-    const gameOverOverlay = document.getElementById("gameOverOverlay");
-    const startBtn = document.getElementById("startBtn");
-    const restartBtn = document.getElementById("restartBtn");
-    const saveBtn = document.getElementById("saveBtn");
-    const nameInput = document.getElementById("nameInput");
-
-    const BEST_KEY = "mgPrecisionBest_v1";
-
-    const state = {
-      running: false, score: 0, round: 1, boxCount: 2,
-      best: Number(localStorage.getItem(BEST_KEY) || 0),
-      phase: "idle", phaseStartedAt: 0, selectedBoxId: null, correctBoxId: null,
-      hoverBoxId: null, showBallTime: 1400, shuffleDuration: 2200,
-      swapsRemaining: 0, activeSwap: null, breatherMs: 300
+    let state = {
+        running: false, score: 0, startTime: 0, totalTime: 0, 
+        phase: "idle", phaseStartedAt: 0, boxes: [], 
+        correctId: null, selectedId: null, swapsRemaining: 0, activeSwap: null,
+        showBallTime: 1400, breatherMs: 300
     };
 
-    const boxes = [];
-    bestValue.textContent = state.best;
-
-    function setPhase(next) { state.phase = next; state.phaseStartedAt = performance.now(); }
-    function lerp(a, b, t) { return a + (b - a) * t; }
-    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
-
-    function roundRect(c, x, y, w, h, r, fill, stroke) {
-      c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y);
-      c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
-      c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h);
-      c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r);
-      c.quadraticCurveTo(x, y, x + r, y); c.closePath();
-      if (fill) c.fill(); if (stroke) c.stroke();
+    function getMarcQuote(score) {
+        if (score <= 5) return '"Fokus verloren. In der Zeit habe ich drei Uhren verkauft."';
+        if (score <= 10) return '"Einstieg ist gemacht. Aber für eine Patek reicht das noch nicht."';
+        if (score <= 15) return '"Du wirst wach. Aber wir machen hier Business, keine Spielchen."';
+        if (score <= 20) return '"Gute Performance. Da erkenne ich langsam den Macher-Instinkt."';
+        if (score <= 25) return '"Stark. Mit dieser Präzision hättest du den Deal heute durchgezogen."';
+        return '"Absolute Elite. Du hast das System dominiert. Respekt."';
     }
 
-    function drawBoxes() {
-      boxes.forEach(box => {
-        const isHovered = state.phase === "pick" && state.hoverBoxId === box.id;
-        const y = box.y - box.lift;
-        const cx = box.x + box.w / 2;
-        const cy = y + box.h / 2;
-        ctx.save();
-        ctx.fillStyle = isHovered ? "#333333" : "#222222";
-        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
-        roundRect(ctx, box.x, y, box.w, box.h, 12, true, true);
-        if (isHovered) {
-          ctx.strokeStyle = "#c5a059"; ctx.lineWidth = 5;
-          roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
-        }
-        if (state.phase === "reveal" && state.selectedBoxId === box.id) {
-          ctx.strokeStyle = state.selectedBoxId === state.correctBoxId ? "#0f9d58" : "#c92a2a";
-          ctx.lineWidth = 5; roundRect(ctx, box.x - 4, y - 4, box.w + 8, box.h + 8, 14, false, true);
-        }
-        if ((state.phase === "show" || state.phase === "reveal") && box.id === state.correctBoxId) {
-          ctx.fillStyle = "#c5a059"; ctx.font = `${box.w * 0.45}px Arial`;
-          ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("👑", cx, cy);
-        }
-        ctx.restore();
-      });
+    function getBrandColor() {
+        return getComputedStyle(document.documentElement).getPropertyValue('--mg-gold').trim();
     }
 
     function buildRound() {
-      boxes.length = 0; state.activeSwap = null; state.selectedBoxId = null; state.hoverBoxId = null;
-      const count = state.boxCount;
-      const maxCols = 5; const cols = Math.min(maxCols, count); const rows = Math.ceil(count / maxCols);
-      const spacing = 24; const availableW = canvas.width - 160; const availableH = canvas.height - 200;
-      const boxW = Math.min(92, Math.min(availableW / cols - spacing, availableH / rows - spacing));
-      const boxH = boxW; const gridH = rows * boxH + (rows - 1) * spacing;
-      const startY = 160 + (availableH - gridH) / 2;
+        if (state.score >= 29) { finish(true); return; }
+        state.boxes = []; state.selectedId = null; state.activeSwap = null;
+        const count = Math.min(30, 2 + state.score);
+        const cols = Math.ceil(Math.sqrt(count));
+        const boxW = Math.max(45, Math.min(92, (canvas.width - 160) / cols - 24));
+        const gridW = cols * boxW + (cols - 1) * 24;
+        const gridH = Math.ceil(count / cols) * boxW + (Math.ceil(count / cols) - 1) * 24;
+        const startX = (canvas.width - gridW) / 2; 
+        const startY = 160 + ((canvas.height - 200) - gridH) / 2;
 
-      for (let i = 0; i < count; i++) {
-        const r = Math.floor(i / maxCols); const c = i % maxCols;
-        const boxesInThisRow = Math.min(maxCols, count - r * maxCols);
-        const rowWidth = boxesInThisRow * boxW + (boxesInThisRow - 1) * spacing;
-        const startX = (canvas.width - rowWidth) / 2;
-        boxes.push({ id: i, x: startX + c * (boxW + spacing), y: startY + r * (boxH + spacing), w: boxW, h: boxH, lift: 0 });
-      }
-      state.correctBoxId = Math.floor(Math.random() * count);
-      state.shuffleDuration = Math.max(1200, 2400 - state.score * 55);
-      state.swapsRemaining = Math.max(4, 4 + Math.floor(count * 1.6));
-      setPhase("show");
+        for (let i = 0; i < count; i++) {
+            const r = Math.floor(i / cols), c = i % cols;
+            state.boxes.push({ id: i, x: startX + c * (boxW + 24), y: startY + r * (boxW + 24), w: boxW, h: boxW, lift: 0 });
+        }
+        state.correctId = Math.floor(Math.random() * count);
+        state.swapsRemaining = Math.max(4, 3 + Math.floor(count * 1.5));
+        state.showBallTime = state.score >= 14 ? 1000 : 1400;
+        setPhase("show");
     }
 
     function startNextSwap() {
-      if (state.swapsRemaining <= 0) { state.activeSwap = null; setPhase("wait"); return; }
-      let a = Math.floor(Math.random() * boxes.length); let b = Math.floor(Math.random() * boxes.length);
-      while (b === a) b = Math.floor(Math.random() * boxes.length);
-      const boxA = boxes[a]; const boxB = boxes[b];
-      state.activeSwap = {
-        aId: boxA.id, bId: boxB.id, aStartX: boxA.x, bStartX: boxB.x, aStartY: boxA.y, bStartY: boxB.y,
-        aTargetX: boxB.x, bTargetX: boxA.x, aTargetY: boxB.y, bTargetY: boxA.y,
-        start: performance.now(), duration: Math.max(260, state.shuffleDuration / 5.2)
-      };
-      state.swapsRemaining--;
-    }
-
-    function updateBoxes(ts) {
-      if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { setPhase("shuffle"); startNextSwap(); }
-      else if (state.phase === "shuffle") {
-        if (!state.activeSwap) { startNextSwap(); return; }
-        const swap = state.activeSwap; const p = Math.min(1, (ts - swap.start) / swap.duration); const e = easeInOutQuad(p);
-        const boxA = boxes.find(box => box.id === swap.aId); const boxB = boxes.find(box => box.id === swap.bId);
-        boxA.x = lerp(swap.aStartX, swap.aTargetX, e); boxB.x = lerp(swap.bStartX, swap.bTargetX, e);
-        boxA.y = lerp(swap.aStartY, swap.aTargetY, e); boxB.y = lerp(swap.bStartY, swap.bTargetY, e);
-        if (p >= 1) { boxA.x = swap.aTargetX; boxA.y = swap.aTargetY; boxB.x = swap.bTargetX; boxB.y = swap.bTargetY; state.activeSwap = null; }
-      } else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) { setPhase("pick"); }
-      else if (state.phase === "reveal") {
-        const selected = boxes.find(box => box.id === state.selectedBoxId); const correct = boxes.find(box => box.id === state.correctBoxId);
-        if (selected) selected.lift = Math.min(selected.h * 0.8, selected.lift + 5);
-        if (correct && correct.id !== state.selectedBoxId) correct.lift = Math.min(correct.h * 0.8, correct.lift + 5);
-        if (ts - state.phaseStartedAt > 1200) {
-          if (state.selectedBoxId === state.correctBoxId) { state.score++; state.round++; state.boxCount = 2 + state.score; buildRound(); updateHud(); }
-          else gameOver();
+        if (state.swapsRemaining <= 0) { state.activeSwap = null; setPhase("wait"); return; }
+        let a, b;
+        if (Math.random() < 0.6) {
+            a = state.boxes.findIndex(box => box.id === state.correctId);
+            b = Math.floor(Math.random() * state.boxes.length);
+            while (b === a) b = Math.floor(Math.random() * state.boxes.length);
+        } else {
+            a = Math.floor(Math.random() * state.boxes.length);
+            b = Math.floor(Math.random() * state.boxes.length);
+            while (b === a) b = Math.floor(Math.random() * state.boxes.length);
         }
-      }
-      if (state.phase !== "reveal") boxes.forEach(box => { box.lift = Math.max(0, box.lift - 6); });
+        state.activeSwap = {
+            aId: state.boxes[a].id, bId: state.boxes[b].id, 
+            aStartX: state.boxes[a].x, bStartX: state.boxes[b].x, aStartY: state.boxes[a].y, bStartY: state.boxes[b].y,
+            aTargetX: state.boxes[b].x, bTargetX: state.boxes[a].x, aTargetY: state.boxes[b].y, bTargetY: state.boxes[a].y,
+            start: performance.now(), duration: Math.max(140, (2200 - state.score * 90) / 7.5)
+        };
+        state.swapsRemaining--;
     }
 
-    function gameOver() {
-      state.running = false; setPhase("gameover");
-      if (state.score > state.best) { state.best = state.score; localStorage.setItem(BEST_KEY, String(state.best)); }
-      document.getElementById("finalScore").textContent = state.score;
-      updateHud();
-      const rank = globalLeaderboard.filter(e => e.score > state.score).length + 1;
-      document.getElementById("idRank").textContent = `#${rank}`;
-      const percentile = Math.min(99.9, Math.max(1, (1 - Math.exp(-state.score * 0.15)) * 100));
-      document.getElementById("idPercentile").textContent = `Top ${(100 - percentile).toFixed(1)}%`;
-      const viral = document.getElementById("viralLockContainer");
-      if (state.score >= 5) { viral.style.display = "block"; viral.classList.remove("unlocked"); } 
-      else viral.style.display = "none";
-      gameOverOverlay.classList.remove("hidden"); marcAnalysis(state.score);
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+    function update(ts) {
+        if (!state.running) return;
+        if (state.phase === "show" && ts - state.phaseStartedAt > state.showBallTime) { setPhase("shuffle"); startNextSwap(); }
+        else if (state.phase === "shuffle") {
+            if (!state.activeSwap) { startNextSwap(); return; }
+            const s = state.activeSwap, p = Math.min(1, (ts - s.start) / s.duration), e = easeInOutQuad(p);
+            const bA = state.boxes.find(b => b.id === s.aId), bB = state.boxes.find(b => b.id === s.bId);
+            if(bA && bB) {
+                bA.x = lerp(s.aStartX, s.aTargetX, e); bB.x = lerp(s.bStartX, s.bTargetX, e);
+                bA.y = lerp(s.aStartY, s.aTargetY, e); bB.y = lerp(s.bStartY, s.bTargetY, e);
+                if (p >= 1) { bA.x = s.aTargetX; bA.y = s.aTargetY; bB.x = s.bTargetX; bB.y = s.bTargetY; state.activeSwap = null; }
+            }
+        } else if (state.phase === "wait" && ts - state.phaseStartedAt > state.breatherMs) setPhase("pick");
+        else if (state.phase === "reveal") {
+            const sel = state.boxes.find(b => b.id === state.selectedId), cor = state.boxes.find(b => b.id === state.correctId);
+            if (sel) sel.lift = Math.min(sel.h * 0.8, sel.lift + 5);
+            if (cor && cor.id !== state.selectedId) cor.lift = Math.min(cor.h * 0.8, cor.lift + 5);
+            if (ts - state.phaseStartedAt > 1200) {
+                if (state.selectedId === state.correctId) { state.score++; buildRound(); }
+                else { if(state.score >= 18) setTimeout(() => finish(false), 600); else finish(false); }
+            }
+        }
+        if (state.phase !== "reveal") state.boxes.forEach(b => b.lift = Math.max(0, b.lift - 6));
     }
 
-    function updateHud() { scoreValue.textContent = state.score; roundValue.textContent = state.round; bestValue.textContent = state.best; }
-    function startGame() { state.running = true; state.score = 0; state.round = 1; state.boxCount = 2; buildRound(); updateHud(); startOverlay.classList.add("hidden"); gameOverOverlay.classList.add("hidden"); }
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        state.boxes.forEach(box => {
+            const y = box.y - box.lift;
+            ctx.save();
+            ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+            ctx.strokeRect(box.x, y, box.w, box.h); ctx.fillRect(box.x, y, box.w, box.h);
+            
+            if (state.phase === "show" && box.id === state.correctId) {
+                ctx.save(); const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8; ctx.globalAlpha = pulse;
+                ctx.strokeStyle = getBrandColor(); ctx.lineWidth = 6; ctx.strokeRect(box.x - 4, y - 4, box.w + 8, box.h + 8);
+                ctx.fillStyle = "#000"; ctx.font = `900 ${Math.floor(box.w * 0.18)}px Arial`; ctx.textAlign = "center";
+                ctx.fillText("FOCUS", box.x + box.w/2, y + box.h/2 + (box.w * 0.06)); ctx.restore();
+            }
 
-    function getCanvasPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      let cx = e.touches ? e.touches[0].clientX : e.clientX;
-      let cy = e.touches ? e.touches[0].clientY : e.clientY;
-      return { x: (cx - rect.left) * (canvas.width / rect.width), y: (cy - rect.top) * (canvas.height / rect.height) };
+            if ((state.phase === "reveal") && box.id === state.correctId) {
+                ctx.fillStyle = "#c5a059"; ctx.font = `${box.w * 0.5}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText("👑", box.x + box.w/2, y + box.h/2);
+            }
+            if (state.phase === "reveal" && box.id === state.selectedId) {
+                ctx.strokeStyle = (state.selectedId === state.correctId ? "#0f9d58" : "#d92d20");
+                ctx.lineWidth = 6; ctx.strokeRect(box.x - 4, y - 4, box.w + 8, box.h + 8);
+            }
+            ctx.restore();
+        });
     }
 
-    function handleTap(e) {
-      const { x, y } = getCanvasPos(e);
-      if (state.phase === "pick") {
-        let clickedId = null;
-        boxes.forEach(box => { if (x >= box.x && x <= box.x + box.w && y >= box.y - box.lift && y <= box.y - box.lift + box.h) clickedId = box.id; });
-        if (clickedId !== null) { state.selectedBoxId = clickedId; setPhase("reveal"); }
-      }
+    function finish(victory) {
+        state.running = false;
+        state.totalTime = (performance.now() - state.startTime) / 1000;
+        document.getElementById("gameOverOverlay").classList.remove("hidden");
+        const finalBoxes = Math.min(30, state.score + 2);
+        document.getElementById("finalScore").textContent = finalBoxes;
+        document.getElementById("finalTime").textContent = `TIME: ${state.totalTime.toFixed(2)}s`;
+        document.getElementById("aiText").textContent = getMarcQuote(state.score);
+        if (finalBoxes >= 30 || victory) document.getElementById("rewardSection").style.display = "block";
     }
 
-    function loop(ts) { ctx.clearRect(0, 0, canvas.width, canvas.height); if (state.running) updateBoxes(ts); drawBoxes(); requestAnimationFrame(loop); }
+    function setPhase(p) { state.phase = p; state.phaseStartedAt = performance.now(); }
 
-    canvas.addEventListener("click", handleTap);
-    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); handleTap(e); }, { passive: false });
-    startBtn.onclick = startGame; restartBtn.onclick = startGame;
+    function handleInteraction(x, y) {
+        if (state.phase === "pick") {
+            state.boxes.forEach(b => { if (x >= b.x && x <= b.x + b.w && y >= b.y - b.lift && y <= b.y - b.lift + b.h) { state.selectedId = b.id; setPhase("reveal"); } });
+        }
+    }
 
-    document.getElementById("shareBtnUnlock").onclick = () => {
-        const text = `Mein MG Focus Score: ${state.score}. Schaffst du mehr? ${window.location.href}`;
-        if (navigator.share) navigator.share({ text }).then(() => document.getElementById("viralLockContainer").classList.add("unlocked"));
-        else { navigator.clipboard.writeText(text); document.getElementById("viralLockContainer").classList.add("unlocked"); }
-    };
+    canvas.onmousedown = e => { const r = canvas.getBoundingClientRect(); handleInteraction((e.clientX - r.left)*(canvas.width/r.width), (e.clientY - r.top)*(canvas.height/r.height)); };
+    canvas.addEventListener("touchstart", e => { e.preventDefault(); const r = canvas.getBoundingClientRect(); handleInteraction((e.touches[0].clientX - r.left)*(canvas.width/r.width), (e.touches[0].clientY - r.top)*(canvas.height/r.height)); }, {passive:false});
 
+    document.getElementById("startBtn").onclick = () => { state.running = true; state.score = 0; state.startTime = performance.now(); document.getElementById("startOverlay").classList.add("hidden"); buildRound(); };
+    
     document.getElementById("saveBtn").onclick = async () => {
-        if (!currentUser) return;
-        const name = nameInput.value.trim().toUpperCase() || "ANON";
-        try {
-            await setDoc(doc(db, 'artifacts', databasePath, 'public', 'data', 'leaderboard', currentUser.uid), { name, score: state.score, timestamp: Date.now() });
-            document.getElementById("saveScoreSection").style.display = "none";
-        } catch(e) { console.error(e); }
+        const name = document.getElementById("nameInput").value.trim().toUpperCase() || "ANON";
+        if (!auth.currentUser) await signInAnonymously(auth);
+        const scoreToSave = Math.min(29, state.score);
+        await setDoc(doc(db, "leaderboard_marc", auth.currentUser.uid), { name, score: scoreToSave, time: state.totalTime, timestamp: serverTimestamp() });
+        location.reload();
     };
 
+    document.getElementById("claimBtn").onclick = async () => {
+        const ig = document.getElementById("igInput").value.trim();
+        if (!ig) return;
+        await setDoc(doc(db, "claims_marc", auth.currentUser.uid), { ig, score: state.score, time: state.totalTime, timestamp: serverTimestamp() });
+        document.getElementById("rewardSection").innerHTML = "<p style='font-size:12px; font-weight:900; color:var(--success)'>CLAIMED. MARC WILL BE NOTIFIED.</p>";
+    };
+
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            onSnapshot(dbRef, snap => {
+                const list = document.getElementById("leaderboardList"); list.innerHTML = "";
+                const items = [];
+                snap.forEach(d => items.push(d.data()));
+                // Sort in memory to avoid needing a Firestore composite index
+                items.sort((a, b) => b.score - a.score || a.time - b.time);
+                items.slice(0, 5).forEach(data => {
+                    list.innerHTML += `<div class="lb-row"><span>${data.name}</span><span>${data.score + 2} (${data.time.toFixed(1)}s)</span></div>`;
+                });
+            }, err => {
+                console.error("Firestore Error:", err);
+            });
+        }
+    });
+    signInAnonymously(auth);
+
+    function loop(ts) { 
+        update(ts); draw(); 
+        if(state.running) {
+            document.getElementById("timeValue").textContent = ((performance.now() - state.startTime)/1000).toFixed(1) + "s";
+            document.getElementById("scoreValue").textContent = state.score;
+            document.getElementById("boxValue").textContent = Math.min(30, state.score + 2);
+        }
+        requestAnimationFrame(loop); 
+    }
     requestAnimationFrame(loop);
 </script>
 </body>
