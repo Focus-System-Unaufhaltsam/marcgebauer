@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title id="uiPageTitle">MG PRECISION | FOCUS SYSTEM</title>
+  <title id="uiPageTitle">MASTER PRECISION | FOCUS SYSTEM</title>
 
   <!-- FIREBASE CORE SDKS (Version 9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -12,7 +12,7 @@
 
   <style>
     :root {
-      --brand-color: #c5a059; 
+      --brand-color: #c5a059; /* Wird per JS überschrieben */
       --bg: #f5f5f7;
       --card-bg: #ffffff;
       --text-main: #343536;
@@ -30,7 +30,7 @@
 
     .btn { appearance:none; border:none; background:#343536; color:#fff; padding:16px 22px; border-radius:14px; font-weight: 900; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; transition:transform .12s ease; text-transform: uppercase; }
     .btn:active { transform:scale(.98); }
-    .btn-gold { background: var(--brand-color); color: #000; }
+    .btn-brand { background: var(--brand-color); color: #000; }
 
     /* HUD: Focus on Boxes & Best */
     .hud { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
@@ -49,7 +49,9 @@
 
     .leaderboard-container { background:#fff; border:2px solid #000; border-radius:22px; padding:20px; margin-top:10px; color: #000; }
     .leaderboard-title { font-weight:900; text-transform:uppercase; margin-bottom:10px; border-bottom:2px solid #000; padding-bottom:5px; }
-    .leaderboard-entry { display:flex; justify-content:space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-weight:700; list-style:none; font-size: 14px; }
+    .leaderboard-entry { display:flex; justify-content:space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-weight:700; list-style:none; font-size: 15px; }
+    .leaderboard-entry .rank-name { display: flex; gap: 10px; align-items: center; }
+    .leaderboard-entry .rank-number { font-weight: 900; color: var(--brand-color); min-width: 25px; }
 
     #nameInput, #igInput { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ccc; font-size: 15px; text-align: center; font-weight: bold; outline: none; text-transform: uppercase; }
     #errorMsg { color: var(--danger); font-size: 11px; font-weight: 900; margin-bottom: 10px; display: none; text-transform: uppercase; }
@@ -79,7 +81,7 @@
         <div class="card">
           <h2 id="uiBrandSub">MG PRECISION CHALLENGE</h2>
           <p id="uiStartDesc">Focus the right box. Losing is instant.</p>
-          <button class="btn" id="startBtn" style="margin-top:20px; width:100%;">START SYSTEM</button>
+          <button class="btn btn-brand" id="startBtn" style="margin-top:20px; width:100%; color:#fff;">START SYSTEM</button>
           
           <div class="legal-links">
             <a href="impressum.html">Imprint</a>
@@ -92,24 +94,24 @@
         <div class="card">
           <h2>FOCUS CONFIRMED!</h2>
           <p>Secure your spot in the global ranking:</p>
-          <div id="errorMsg">NAME ALREADY TAKEN</div>
+          <div id="errorMsg"></div>
           <input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="15" />
-          <button class="btn" id="saveScoreBtn" style="width:100%;">SAVE RANK</button>
+          <button class="btn btn-brand" id="saveScoreBtn" style="width:100%; color:#fff;">SAVE RANK</button>
         </div>
       </div>
 
       <div class="overlay hidden" id="gameOverOverlay">
         <div class="card">
-          <h2 style="color:var(--danger)">SYSTEM FAILED</h2>
+          <h2 id="uiGameOverFail" style="color:var(--danger)">SYSTEM FAILED</h2>
           <p id="aiText" style="font-size:13px; font-weight:bold; font-style:italic; margin:15px 0; min-height:40px; color:#555;"></p>
           <div id="finalScore" style="font-size:60px; font-weight:900; margin:10px 0; color: #000;">0 BOXES</div>
           <p id="finalTime" style="font-size:16px; font-weight:900; color:var(--brand-color); margin-bottom:20px;">TIME: 0.00s</p>
           <button class="btn" id="restartBtn" style="width:100%; margin-bottom:12px;">REBOOT</button>
           
           <div id="rewardSection" style="display:none; background:var(--bg); padding:15px; margin-bottom:15px; border-left:4px solid var(--brand-color);">
-            <p style="font-size:11px; font-weight:900; margin-bottom:10px;">ELITE STATUS: CLAIM REWARD</p>
+            <p id="uiRewardTitle" style="font-size:11px; font-weight:900; margin-bottom:10px;">ELITE STATUS: CLAIM REWARD</p>
             <input type="text" id="igInput" placeholder="INSTAGRAM HANDLE">
-            <button class="btn btn-gold" id="claimBtn">CONFIRM WITH MARC</button>
+            <button class="btn btn-brand" id="claimBtn" style="color:#fff;">CONFIRM</button>
           </div>
         </div>
       </div>
@@ -117,22 +119,59 @@
 
     <section class="leaderboard-container">
       <div id="uiMyth" style="font-weight:900; margin-bottom:8px; color:var(--danger);">30 BOXES: NOBODY</div>
-      <div class="leaderboard-title">Global Elite Ranking (Top 5)</div>
+      <div class="leaderboard-title">Global Elite Ranking (Top 10)</div>
       <div id="leaderboardList"></div>
     </section>
   </main>
 
   <script>
     // ======================================================
-    // 1. CLIENT CONFIGURATION
+    // 1. MASTER CONFIGURATION (KONTROLLZENTRUM)
     // ======================================================
     const CLIENT_CONFIG = {
-        id: "leaderboard_marc",
+        // --- 1. SYSTEM & DATENBANK ---
+        id: "leaderboard_marc", // Eindeutige ID für die Datenbank
+        minScoreToSave: 1,      // Mindestens 1 Treffer (3 Boxen) nötig für Leaderboard
+        easterEggScore: 29,     // Bei Score 29 (31 Boxen) ist das Spiel gewonnen
+        
+        // --- 2. VISUELLE IDENTITÄT ---
+        pageTitle: "MG PRECISION | FOCUS SYSTEM",
         brandTitle: "UNAUFHALTSAM",
         brandSub: "MG PRECISION CHALLENGE",
-        brandColor: "#c5a059",
-        easterEggScore: 29 
+        brandColor: "#c5a059", // Hauptfarbe
+        logoFileName: "marc-logo", // Dateiname des Logos (ohne .png)
+        
+        // --- 3. TEXTE & KOMMUNIKATION ---
+        startDesc: "Focus the right box. Losing is instant.",
+        gameOverFail: "SYSTEM FAILED",
+        rewardTitle: "ELITE STATUS: CLAIM REWARD",
+        rewardInputPlaceholder: "INSTAGRAM HANDLE",
+        rewardBtnText: "CONFIRM WITH MARC",
+        rewardSuccessMsg: "CLAIMED. MARC WILL BE NOTIFIED.",
+        
+        // --- 4. KI ZITATE (Dynamisch nach Score) ---
+        quotes: [
+            '"Fokus verloren. In der Zeit habe ich drei Uhren verkauft."',          // 0 - 5 Boxen
+            '"Einstieg ist gemacht. Aber für eine Patek reicht das noch nicht."',   // 6 - 10 Boxen
+            '"Du wirst wach. Aber wir machen hier Business, keine Spielchen."',     // 11 - 15 Boxen
+            '"Gute Performance. Da erkenne ich langsam den Macher-Instinkt."',      // 16 - 20 Boxen
+            '"Stark. Mit dieser Präzision hättest du den Deal heute durchgezogen."',// 21 - 25 Boxen
+            '"Absolute Elite. Du hast das System dominiert. Respekt."'              // 26+ Boxen
+        ]
     };
+
+    // ======================================================
+    // SYSTEM INITIALISIERUNG (Config anwenden)
+    // ======================================================
+    document.title = CLIENT_CONFIG.pageTitle;
+    document.getElementById("uiBrandTitle").textContent = CLIENT_CONFIG.brandTitle;
+    document.getElementById("uiBrandSub").textContent = CLIENT_CONFIG.brandSub;
+    document.getElementById("uiStartDesc").textContent = CLIENT_CONFIG.startDesc;
+    document.getElementById("uiGameOverFail").textContent = CLIENT_CONFIG.gameOverFail;
+    document.getElementById("uiRewardTitle").textContent = CLIENT_CONFIG.rewardTitle;
+    document.getElementById("igInput").placeholder = CLIENT_CONFIG.rewardInputPlaceholder;
+    document.getElementById("claimBtn").textContent = CLIENT_CONFIG.rewardBtnText;
+    document.documentElement.style.setProperty('--brand-color', CLIENT_CONFIG.brandColor);
 
     // ======================================================
     // 2. FIREBASE ENGINE
@@ -157,30 +196,47 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
-    // LOGO LADEN - AGGRESSIVES FALLBACK SYSTEM (Macher-Lösung)
+    // AGGRESSIVES FALLBACK FÜR BILDER (Inkl. Absolute GitHub-Links als Rettungsanker)
     const imgLogo = new Image(); 
-    let logoError = false;
     let fallbackIndex = 0;
+    let logoStatus = "LÄDT";
+    let logoError = false;
     
-    // Probiert alle gängigen Fehler aus, die beim Upload passieren können
+    // Fallback Array: Falls lokale Tests (file://) oder Adblocker blockieren, ziehen wir das Bild live aus deinem Repo
     const fallbacks = [
+        `${CLIENT_CONFIG.logoFileName}.png`,
+        `./${CLIENT_CONFIG.logoFileName}.png`,
+        "gebauer-logo.png",
+        "logo.png",
         "marc-logo.png",
-        "marc-logo.PNG",
-        "Marc-logo.png",
-        "Marc-Logo.png",
-        "MARC-LOGO.PNG",
-        "marc-logo.png.png"
+        "https://focus-system-unaufhaltsam.github.io/marcgebauer/marc-logo.png", // Ultimativer Fallback 1
+        "https://focus-system-unaufhaltsam.github.io/marcgebauer/gebauer-logo.png" // Ultimativer Fallback 2
     ];
 
-    imgLogo.onerror = () => { 
-        fallbackIndex++;
+    function loadNextFallback() {
         if (fallbackIndex < fallbacks.length) {
-            imgLogo.src = fallbacks[fallbackIndex]; // Nächste Schreibweise testen
+            console.log("[SYSTEM] Prüfe Bildpfad:", fallbacks[fallbackIndex]);
+            imgLogo.src = fallbacks[fallbackIndex];
         } else {
-            logoError = true; // Bild endgültig nicht gefunden
+            logoStatus = "FEHLER";
+            logoError = true;
+            console.error("[SYSTEM FEHLER] Alle Bilder blockiert oder nicht gefunden. Hast du einen AdBlocker aktiviert?");
         }
+    }
+
+    imgLogo.onload = () => { 
+        console.log("[SYSTEM] ERFOLG! Bild geladen:", imgLogo.src);
+        logoStatus = "OK"; 
+        logoError = false; 
     };
-    imgLogo.src = fallbacks[0]; // Erster Versuch
+    imgLogo.onerror = () => { 
+        console.warn("[SYSTEM] Fehlschlag für Pfad:", fallbacks[fallbackIndex]);
+        fallbackIndex++;
+        loadNextFallback();
+    };
+    
+    // Start Loading
+    loadNextFallback();
     
     const BEST_KEY = "focusBest_" + CLIENT_CONFIG.id;
 
@@ -188,20 +244,20 @@
       running: false, score: 0, startTime: 0, totalTime: 0,
       phase: "idle", phaseStartedAt: 0, boxes: [], 
       correctId: null, selectedId: null, swapsRemaining: 0, activeSwap: null,
-      showBallTime: 1400, breatherMs: 300, cachedLeaderboard: []
+      showBallTime: 1400, breatherMs: 300
     };
 
-    function getMarcQuote(score) {
-        if (score <= 5) return '"Fokus verloren. In der Zeit habe ich drei Uhren verkauft."';
-        if (score <= 10) return '"Einstieg ist gemacht. Aber für eine Patek reicht das noch nicht."';
-        if (score <= 15) return '"Du wirst wach. Aber wir machen hier Business, keine Spielchen."';
-        if (score <= 20) return '"Gute Performance. Da erkenne ich langsam den Macher-Instinkt."';
-        if (score <= 25) return '"Stark. Mit dieser Präzision hättest du den Deal heute durchgezogen."';
-        return '"Absolute Elite. Du hast das System dominiert. Respekt."';
+    function getAIQuote(score) {
+        if (score <= 5) return CLIENT_CONFIG.quotes[0];
+        if (score <= 10) return CLIENT_CONFIG.quotes[1];
+        if (score <= 15) return CLIENT_CONFIG.quotes[2];
+        if (score <= 20) return CLIENT_CONFIG.quotes[3];
+        if (score <= 25) return CLIENT_CONFIG.quotes[4];
+        return CLIENT_CONFIG.quotes[5];
     }
 
     function buildRound() {
-      if (state.score >= 29) { finish(true); return; }
+      if (state.score >= CLIENT_CONFIG.easterEggScore) { finish(true); return; }
       state.boxes = []; state.selectedId = null; state.activeSwap = null;
       const count = Math.min(30, 2 + state.score);
       const cols = Math.ceil(Math.sqrt(count));
@@ -272,50 +328,37 @@
         const y = box.y - box.lift;
         ctx.save();
         
-        // Zeichne die Kiste (Hintergrund)
         ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
         ctx.strokeRect(box.x, y, box.w, box.h); ctx.fillRect(box.x, y, box.w, box.h);
         
-        // DRAW LOGO ON ALL BOXES (Exakt wie Eddies Zunge skaliert)
-        if (imgLogo.complete && imgLogo.naturalWidth > 0) {
+        // --- LOGO RENDER LOGIK ---
+        if (logoStatus === "OK" && imgLogo.naturalWidth > 0) {
             ctx.drawImage(imgLogo, box.x + box.w * 0.04, y + box.h * 0.04, box.w * 0.92, box.h * 0.92);
-        } else if (logoError) {
-            // DEBUG: Zeigt dir sofort, wenn GitHub die Datei nicht findet
-            ctx.fillStyle = "rgba(200, 0, 0, 0.1)"; ctx.fillRect(box.x, y, box.w, box.h);
-            ctx.fillStyle = "red"; ctx.font = "900 12px Arial"; ctx.textAlign = "center";
-            ctx.fillText("BILD FEHLT", box.x + box.w/2, y + box.h/2);
-        }
-
-        // SHOW "FOCUS" TEXT
-        if (state.phase === "show" && box.id === state.correctId) {
-            ctx.save(); 
-            const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8; 
-            ctx.globalAlpha = pulse;
-            ctx.strokeStyle = CLIENT_CONFIG.brandColor; ctx.lineWidth = 6; 
-            ctx.strokeRect(box.x - 4, y - 4, box.w + 8, box.h + 8);
-            
-            // Leichter weißer Hintergrund damit der Text besser lesbar ist, falls das Logo dunkel ist
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            ctx.fillRect(box.x, y, box.w, box.h);
-
-            ctx.font = `900 ${Math.floor(box.w * 0.24)}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 4; ctx.strokeText("FOCUS", box.x + box.w/2, y + box.h/2);
-            ctx.fillStyle = "#fff"; ctx.fillText("FOCUS", box.x + box.w/2, y + box.h/2); 
+        } else if (logoStatus === "FEHLER" || logoError) {
+            // Stylischer Text-Fallback (MG) für die Vorschau oder falls das Bild fehlt
+            ctx.save();
+            ctx.fillStyle = CLIENT_CONFIG.brandColor;
+            ctx.font = `900 ${Math.floor(box.w * 0.4)}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("MG", box.x + box.w / 2, y + box.h / 2);
             ctx.restore();
         }
 
-        // SHOW CROWN
-        if (state.phase === "reveal" && box.id === state.correctId) {
-            // Leichter weißer Hintergrund damit die Krone besser lesbar ist
-            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-            ctx.fillRect(box.x, y, box.w, box.h);
-
-            ctx.fillStyle = CLIENT_CONFIG.brandColor; ctx.font = `${box.w * 0.5}px Arial`; 
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.fillText("👑", box.x + box.w/2, y + box.h/2);
+        if (state.phase === "show" && box.id === state.correctId) {
+            ctx.save(); const pulse = Math.sin(performance.now() / 150) * 0.2 + 0.8; ctx.globalAlpha = pulse;
+            ctx.strokeStyle = CLIENT_CONFIG.brandColor; ctx.lineWidth = 6; ctx.strokeRect(box.x - 4, y - 4, box.w + 8, box.h + 8);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)"; ctx.fillRect(box.x, y, box.w, box.h);
+            ctx.font = `900 ${Math.floor(box.w * 0.24)}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 4; ctx.strokeText("FOCUS", box.x + box.w/2, y + box.h/2);
+            ctx.fillStyle = "#fff"; ctx.fillText("FOCUS", box.x + box.w/2, y + box.h/2); ctx.restore();
         }
 
-        // HIGHLIGHT SELECTED BOX
+        if (state.phase === "reveal" && box.id === state.correctId) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)"; ctx.fillRect(box.x, y, box.w, box.h);
+            ctx.fillStyle = CLIENT_CONFIG.brandColor; ctx.font = `${box.w * 0.5}px Arial`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText("👑", box.x + box.w/2, y + box.h/2);
+        }
         if (state.phase === "reveal" && box.id === state.selectedId) {
             ctx.strokeStyle = (state.selectedId === state.correctId ? "#0f9d58" : "#d92d20");
             ctx.lineWidth = 6; ctx.strokeRect(box.x - 4, y - 4, box.w + 8, box.h + 8);
@@ -331,9 +374,10 @@
       const finalBoxes = Math.min(30, state.score + 2);
       document.getElementById("finalScore").textContent = finalBoxes + " BOXES";
       document.getElementById("finalTime").textContent = `TIME: ${state.totalTime.toFixed(2)}s`;
-      document.getElementById("aiText").textContent = getMarcQuote(state.score);
+      document.getElementById("aiText").textContent = getAIQuote(state.score);
+      
       if (finalBoxes >= 30 || victory) document.getElementById("rewardSection").style.display = "block";
-      if (state.score > 0) document.getElementById("nameOverlay").classList.remove("hidden");
+      if (state.score >= CLIENT_CONFIG.minScoreToSave) document.getElementById("nameOverlay").classList.remove("hidden");
     }
 
     function setPhase(p) { state.phase = p; state.phaseStartedAt = performance.now(); }
@@ -356,47 +400,115 @@
     document.getElementById("restartBtn").onclick = () => location.reload();
     document.getElementById("resetBtn").onclick = () => location.reload();
     
+    // ======================================================
+    // ELITE LEADERBOARD SPEICHER LOGIK
+    // ======================================================
     document.getElementById("saveScoreBtn").onclick = async () => {
-        const name = document.getElementById("nameInput").value.trim().toUpperCase();
+        const rawName = document.getElementById("nameInput").value.trim().toUpperCase();
+        // Bereinigen: Nur Buchstaben und Zahlen erlauben (Sicherheit für DB)
+        const name = rawName.replace(/[^A-Z0-9]/g, ''); 
         const errorEl = document.getElementById("errorMsg");
-        if (!name || name === "ANON") { errorEl.textContent = "CHOOSE A REAL NAME"; errorEl.style.display = "block"; return; }
-        
-        if (!auth.currentUser) await auth.signInAnonymously();
-        const uid = auth.currentUser.uid;
 
-        // PREVENT DUPLICATE NAMES FROM DIFFERENT IDS
-        const isNameTaken = state.cachedLeaderboard.some(e => e.name === name && e.uid !== uid);
-        if (isNameTaken) { errorEl.style.display = "block"; return; }
+        if (!name) { errorEl.textContent = "BITTE REALEN NAMEN WÄHLEN"; errorEl.style.display = "block"; return; }
 
-        const scoreToSave = Math.min(29, state.score);
-        await dbRef.doc(uid).set({ 
-            name: name, score: scoreToSave, time: state.totalTime, timestamp: firebase.firestore.FieldValue.serverTimestamp() 
-        });
-        if (state.score > (Number(localStorage.getItem(BEST_KEY)) || 0)) localStorage.setItem(BEST_KEY, state.score);
-        location.reload();
+        // Score berechnen (Was der User sieht)
+        const displayScore = state.score + 2;
+
+        // REGEL 1: Keine Nullnummern & Mindestgrenze aus Config
+        if (state.score < CLIENT_CONFIG.minScoreToSave) {
+            errorEl.textContent = "ZU SCHWACH FÜR DAS SYSTEM.";
+            errorEl.style.display = "block";
+            setTimeout(() => location.reload(), 2000);
+            return;
+        }
+
+        document.getElementById("saveScoreBtn").disabled = true;
+
+        try {
+            // REGEL 2: Name ist die eindeutige ID (Jeder kann nur einmal rein)
+            const userDocRef = dbRef.doc(name);
+            const docSnap = await userDocRef.get();
+
+            if (docSnap.exists) {
+                const existingData = docSnap.data();
+                // Check: Ist der neue Score besser?
+                if (displayScore <= existingData.score) {
+                    errorEl.textContent = "KEINE VERBESSERUNG. NUR DEIN BESTWERT ZÄHLT.";
+                    errorEl.style.display = "block";
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+            }
+
+            // Schreiben / Überschreiben mit neuem Bestwert
+            const finalScoreToSave = Math.min(CLIENT_CONFIG.easterEggScore + 2, displayScore);
+            await userDocRef.set({
+                name: name,
+                score: finalScoreToSave,
+                time: state.totalTime,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            if (state.score > (Number(localStorage.getItem(BEST_KEY)) || 0)) {
+                localStorage.setItem(BEST_KEY, state.score);
+            }
+            location.reload();
+        } catch (e) {
+            console.error(e);
+            errorEl.textContent = "NETZWERKFEHLER. VERSUCHE ES ERNEUT.";
+            errorEl.style.display = "block";
+            document.getElementById("saveScoreBtn").disabled = false;
+        }
     };
 
     document.getElementById("claimBtn").onclick = async () => {
         const ig = document.getElementById("igInput").value.trim();
         if (!ig) return;
-        await db.collection("claims_marc").doc(auth.currentUser.uid).set({ 
+        const claimCollection = "claims_" + CLIENT_CONFIG.id.replace("leaderboard_", "");
+        await db.collection(claimCollection).doc(auth.currentUser.uid).set({ 
             ig: ig, score: state.score, time: state.totalTime, timestamp: firebase.firestore.FieldValue.serverTimestamp() 
         });
-        document.getElementById("rewardSection").innerHTML = "<p style='font-size:12px; font-weight:900; color:var(--success)'>CLAIMED. MARC WILL BE NOTIFIED.</p>";
+        document.getElementById("rewardSection").innerHTML = `<p style='font-size:12px; font-weight:900; color:var(--success)'>${CLIENT_CONFIG.rewardSuccessMsg}</p>`;
     };
 
+    // ======================================================
+    // TOP 10 ANZEIGE LOGIK (Inkl. JavaScript Sortier-Fix)
+    // ======================================================
     auth.onAuthStateChanged(user => {
       if (user) {
+        // REGEL 3: Alle Daten abrufen und in JavaScript sortieren (verhindert Firestore-Index-Fehler)
         dbRef.onSnapshot(snap => {
-          const list = document.getElementById("leaderboardList"); list.innerHTML = "";
-          state.cachedLeaderboard = [];
-          snap.forEach(d => state.cachedLeaderboard.push({ ...d.data(), uid: d.id }));
-          state.cachedLeaderboard.sort((a, b) => (b.score || 0) - (a.score || 0) || (a.time || 999) - (b.time || 999));
-          state.cachedLeaderboard.slice(0, 5).forEach(data => {
-            const bxs = Math.min(30, (data.score || 0) + 2);
-            const tm = typeof data.time === 'number' ? data.time.toFixed(1) + "s" : "N/A";
-            list.innerHTML += `<div class="leaderboard-entry"><span>${data.name}</span><span>${bxs} (${tm})</span></div>`;
+          let allEntries = [];
+          snap.forEach(d => allEntries.push(d.data()));
+          
+          // Sortieren: Höchster Score zuerst, bei Gleichstand schnellste Zeit
+          allEntries.sort((a, b) => {
+             if (b.score !== a.score) return b.score - a.score;
+             const timeA = typeof a.time === 'number' ? a.time : 999;
+             const timeB = typeof b.time === 'number' ? b.time : 999;
+             return timeA - timeB;
           });
+
+          // Auf die besten 10 limitieren
+          const top10 = allEntries.slice(0, 10);
+
+          const list = document.getElementById("leaderboardList"); 
+          list.innerHTML = "";
+          let rank = 1;
+          top10.forEach(data => {
+            const tm = typeof data.time === 'number' ? data.time.toFixed(1) + "s" : "N/A";
+            list.innerHTML += `
+              <li class="leaderboard-entry">
+                <div class="rank-name">
+                    <span class="rank-number">#${rank}</span>
+                    <span>${data.name}</span>
+                </div>
+                <span>${data.score} BOXES <span style="font-size:10px; opacity:0.5;">(${tm})</span></span>
+              </li>`;
+            rank++;
+          });
+        }, error => {
+           console.error("Leaderboard Fehler:", error);
         });
       }
     });
