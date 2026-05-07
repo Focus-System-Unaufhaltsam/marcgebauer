@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title id="uiPageTitle">MASTER PRECISION | FOCUS SYSTEM</title>
 
-  <!-- FIREBASE CORE SDKS (Version 9 Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
     :root {
-      --brand-color: #c5a059; /* Wird per JS überschrieben */
+      --brand-color: #c5a059; /* Wird per JS ueberschrieben */
       --bg: #f5f5f7;
       --card-bg: #ffffff;
       --text-main: #343536;
@@ -106,12 +105,17 @@
           <p id="aiText" style="font-size:13px; font-weight:bold; font-style:italic; margin:15px 0; min-height:40px; color:#555;"></p>
           <div id="finalScore" style="font-size:60px; font-weight:900; margin:10px 0; color: #000;">0 BOXES</div>
           <p id="finalTime" style="font-size:16px; font-weight:900; color:var(--brand-color); margin-bottom:20px;">TIME: 0.00s</p>
+          
           <button class="btn" id="restartBtn" style="width:100%; margin-bottom:12px;">REBOOT</button>
           
+          <a href="https://www.marcgebauer.com" target="_blank" class="btn btn-brand" style="width:100%; color:#fff; margin-bottom:20px; background-color: #c5a059;">
+            ZUM MG SYSTEM
+          </a>
+
           <div id="rewardSection" style="display:none; background:var(--bg); padding:15px; margin-bottom:15px; border-left:4px solid var(--brand-color);">
             <p id="uiRewardTitle" style="font-size:11px; font-weight:900; margin-bottom:10px;">ELITE STATUS: CLAIM REWARD</p>
             <input type="text" id="igInput" placeholder="INSTAGRAM HANDLE">
-            <button class="btn btn-brand" id="claimBtn" style="color:#fff;">CONFIRM</button>
+            <button class="btn btn-brand" id="claimBtn" style="color:#fff; width:100%;">CONFIRM WITH MARC</button>
           </div>
         </div>
       </div>
@@ -130,11 +134,11 @@
     // ======================================================
     const CLIENT_CONFIG = {
         // --- 1. SYSTEM & DATENBANK ---
-        id: "leaderboard_marc", // Eindeutige ID für die Datenbank
-        minScoreToSave: 1,      // Mindestens 1 Treffer (3 Boxen) nötig für Leaderboard
+        id: "leaderboard_marc", // Eindeutige ID fuer die Datenbank
+        minScoreToSave: 1,      // Mindestens 1 Treffer (3 Boxen) noetig fuer Leaderboard
         easterEggScore: 29,     // Bei Score 29 (31 Boxen) ist das Spiel gewonnen
         
-        // --- 2. VISUELLE IDENTITÄT ---
+        // --- 2. VISUELLE IDENTITAET ---
         pageTitle: "MG PRECISION | FOCUS SYSTEM",
         brandTitle: "UNAUFHALTSAM",
         brandSub: "MG PRECISION CHALLENGE",
@@ -196,10 +200,10 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     
-    // AGGRESSIVES FALLBACK FÜR BILDER (Inkl. Absolute GitHub-Links als Rettungsanker)
+    // AGGRESSIVES FALLBACK FUER BILDER (Inkl. Absolute GitHub-Links als Rettungsanker)
     const imgLogo = new Image(); 
     let fallbackIndex = 0;
-    let logoStatus = "LÄDT";
+    let logoStatus = "LAEDT";
     let logoError = false;
     
     // Fallback Array: Falls lokale Tests (file://) oder Adblocker blockieren, ziehen wir das Bild live aus deinem Repo
@@ -215,7 +219,7 @@
 
     function loadNextFallback() {
         if (fallbackIndex < fallbacks.length) {
-            console.log("[SYSTEM] Prüfe Bildpfad:", fallbacks[fallbackIndex]);
+            console.log("[SYSTEM] Pruefe Bildpfad:", fallbacks[fallbackIndex]);
             imgLogo.src = fallbacks[fallbackIndex];
         } else {
             logoStatus = "FEHLER";
@@ -230,7 +234,7 @@
         logoError = false; 
     };
     imgLogo.onerror = () => { 
-        console.warn("[SYSTEM] Fehlschlag für Pfad:", fallbacks[fallbackIndex]);
+        console.warn("[SYSTEM] Fehlschlag fuer Pfad:", fallbacks[fallbackIndex]);
         fallbackIndex++;
         loadNextFallback();
     };
@@ -335,7 +339,7 @@
         if (logoStatus === "OK" && imgLogo.naturalWidth > 0) {
             ctx.drawImage(imgLogo, box.x + box.w * 0.04, y + box.h * 0.04, box.w * 0.92, box.h * 0.92);
         } else if (logoStatus === "FEHLER" || logoError) {
-            // Stylischer Text-Fallback (MG) für die Vorschau oder falls das Bild fehlt
+            // Stylischer Text-Fallback (MG) fuer die Vorschau oder falls das Bild fehlt
             ctx.save();
             ctx.fillStyle = CLIENT_CONFIG.brandColor;
             ctx.font = `900 ${Math.floor(box.w * 0.4)}px Arial`;
@@ -405,18 +409,18 @@
     // ======================================================
     document.getElementById("saveScoreBtn").onclick = async () => {
         const rawName = document.getElementById("nameInput").value.trim().toUpperCase();
-        // Bereinigen: Nur Buchstaben und Zahlen erlauben (Sicherheit für DB)
+        // Bereinigen: Nur Buchstaben und Zahlen erlauben (Sicherheit fuer DB)
         const name = rawName.replace(/[^A-Z0-9]/g, ''); 
         const errorEl = document.getElementById("errorMsg");
 
-        if (!name) { errorEl.textContent = "BITTE REALEN NAMEN WÄHLEN"; errorEl.style.display = "block"; return; }
+        if (!name) { errorEl.textContent = "BITTE REALEN NAMEN WAEHLEN"; errorEl.style.display = "block"; return; }
 
         // Score berechnen (Was der User sieht)
         const displayScore = state.score + 2;
 
         // REGEL 1: Keine Nullnummern & Mindestgrenze aus Config
         if (state.score < CLIENT_CONFIG.minScoreToSave) {
-            errorEl.textContent = "ZU SCHWACH FÜR DAS SYSTEM.";
+            errorEl.textContent = "ZU SCHWACH FUER DAS SYSTEM.";
             errorEl.style.display = "block";
             setTimeout(() => location.reload(), 2000);
             return;
@@ -433,14 +437,14 @@
                 const existingData = docSnap.data();
                 // Check: Ist der neue Score besser?
                 if (displayScore <= existingData.score) {
-                    errorEl.textContent = "KEINE VERBESSERUNG. NUR DEIN BESTWERT ZÄHLT.";
+                    errorEl.textContent = "KEINE VERBESSERUNG. NUR DEIN BESTWERT ZAEHLT.";
                     errorEl.style.display = "block";
                     setTimeout(() => location.reload(), 2000);
                     return;
                 }
             }
 
-            // Schreiben / Überschreiben mit neuem Bestwert
+            // Schreiben / Ueberschreiben mit neuem Bestwert
             const finalScoreToSave = Math.min(CLIENT_CONFIG.easterEggScore + 2, displayScore);
             await userDocRef.set({
                 name: name,
@@ -481,7 +485,7 @@
           let allEntries = [];
           snap.forEach(d => allEntries.push(d.data()));
           
-          // Sortieren: Höchster Score zuerst, bei Gleichstand schnellste Zeit
+          // Sortieren: Hoechster Score zuerst, bei Gleichstand schnellste Zeit
           allEntries.sort((a, b) => {
              if (b.score !== a.score) return b.score - a.score;
              const timeA = typeof a.time === 'number' ? a.time : 999;
