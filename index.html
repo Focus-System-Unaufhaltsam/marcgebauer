@@ -89,22 +89,19 @@
         </div>
       </div>
 
-      <div class="overlay hidden" id="nameOverlay">
-        <div class="card">
-          <h2>FOCUS CONFIRMED!</h2>
-          <p>Secure your spot in the global ranking:</p>
-          <div id="errorMsg"></div>
-          <input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="15" />
-          <button class="btn btn-brand" id="saveScoreBtn" style="width:100%; color:#fff;">SAVE RANK</button>
-        </div>
-      </div>
-
       <div class="overlay hidden" id="gameOverOverlay">
         <div class="card">
           <h2 id="uiGameOverFail" style="color:var(--danger)">SYSTEM FAILED</h2>
           <p id="aiText" style="font-size:13px; font-weight:bold; font-style:italic; margin:15px 0; min-height:40px; color:#555;"></p>
           <div id="finalScore" style="font-size:60px; font-weight:900; margin:10px 0; color: #000;">0 BOXES</div>
           <p id="finalTime" style="font-size:16px; font-weight:900; color:var(--brand-color); margin-bottom:20px;">TIME: 0.00s</p>
+          
+          <div id="leaderboardEntrySection" style="display:none; margin-bottom: 20px; padding-top: 15px; border-top: 2px solid #000;">
+            <p style="font-size:12px; font-weight:900; margin-bottom:10px; text-transform:uppercase; color:#000;">Secure your spot in the ranking:</p>
+            <div id="errorMsg"></div>
+            <input type="text" id="nameInput" placeholder="YOUR NAME" maxlength="15" />
+            <button class="btn btn-brand" id="saveScoreBtn" style="width:100%; color:#fff; margin-bottom: 10px;">SAVE RANK</button>
+          </div>
           
           <button class="btn" id="restartBtn" style="width:100%; margin-bottom:12px;">REBOOT</button>
           
@@ -381,7 +378,7 @@
       document.getElementById("aiText").textContent = getAIQuote(state.score);
       
       if (finalBoxes >= 30 || victory) document.getElementById("rewardSection").style.display = "block";
-      if (state.score >= CLIENT_CONFIG.minScoreToSave) document.getElementById("nameOverlay").classList.remove("hidden");
+      if (state.score >= CLIENT_CONFIG.minScoreToSave) document.getElementById("leaderboardEntrySection").style.display = "block";
     }
 
     function setPhase(p) { state.phase = p; state.phaseStartedAt = performance.now(); }
